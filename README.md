@@ -78,19 +78,6 @@ rag-application/
 | Embedding model | `main.py` / `ingest.py` | `qwen3-embedding-0.6b` | Converts text to vectors |
 | Chat model | `main.py` | `phi-3.5-mini` | Generates the final answer |
 
-## Testing
-
-A set of manual test queries was used to verify the assistant behaves correctly both for in-scope and out-of-scope questions:
-
-| Query | Expected behavior | Result |
-|---|---|---|
-| "Who is considered the father of medicine?" | Correct answer with source citation | ✅ Correct (Hippocrates, cited) |
-| "How did the Greeks contribute to the history of medicine?" | Correct, context-grounded answer | ✅ Correct |
-| "What is the capital of France?" | "I don't have enough information..." | ✅ Correct — initially hallucinated ("Paris") with `qwen2.5-0.5b`; fixed by switching to `phi-3.5-mini` and adding a similarity threshold, then re-verified |
-| "Who won the World Cup in 2026?" | "I don't have enough information..." | ✅ Correct — initially hallucinated ("Argentina"); fixed and re-verified the same way |
-| Empty input | Re-prompt, don't exit | ✅ Correct |
-| `quit` | Clean exit, models unloaded | ✅ Correct |
-
 ## Lessons learned
 
 - **Small models don't reliably follow instructions.** The initial chat model (`qwen2.5-0.5b`, 0.5B parameters) ignored the system prompt's "only use the provided context" rule for general-knowledge questions it already "knew" the answer to (e.g. the capital of France). Switching to a slightly larger model (`phi-3.5-mini`) and adding a **similarity-score threshold** — rejecting retrieval results below a minimum relevance score before they even reach the model — solved this reliably.
